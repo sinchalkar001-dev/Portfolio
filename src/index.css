@@ -1,0 +1,157 @@
+@import "tailwindcss";
+
+/*
+  Color encodes authorship, like a shared document:
+  lime = Sinchal (his edits, his calls to action), violet = you (your cursor, focus, selection).
+  Type has two voices: Bricolage Grotesque for people, JetBrains Mono for machines.
+*/
+@theme {
+  --color-bg: #0b0c0e;
+  --color-surface: #121418;
+  --color-raised: #191c21;
+  --color-line: #262a31;
+  --color-line-strong: #383e48;
+  --color-fg: #eceae4;
+  --color-muted: #a2a5ac;
+  --color-faint: #82878f;
+  --color-accent: #c8f55a;
+  --color-accent-ink: #0b0c0e;
+  --color-peer: #aa9bff;
+
+  --font-sans: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out-cubic: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --animate-caret-blink: caret-blink 1.05s steps(1, end) infinite;
+  --animate-ink-me: ink-me 1.2s var(--ease-out-quart);
+  --animate-ink-peer: ink-peer 1.2s var(--ease-out-quart);
+  --animate-pulse-dot: pulse-dot 2.4s ease-out infinite;
+  --animate-comment-in: comment-in 650ms var(--ease-out-quart) both;
+  --animate-log-in: log-in 450ms var(--ease-out-quart) both;
+  --animate-underline-in: underline-in 700ms var(--ease-out-quart) both;
+
+  @keyframes caret-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  @keyframes ink-me {
+    from { color: var(--color-accent); }
+    to { color: var(--color-fg); }
+  }
+  @keyframes ink-peer {
+    from { color: var(--color-peer); }
+    to { color: var(--color-fg); }
+  }
+  @keyframes pulse-dot {
+    0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-accent) 55%, transparent); }
+    70%, 100% { box-shadow: 0 0 0 7px transparent; }
+  }
+  @keyframes comment-in {
+    from { opacity: 0; transform: translateX(16px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes log-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes underline-in {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    scroll-padding-top: 5rem;
+    -webkit-text-size-adjust: 100%;
+    scrollbar-color: var(--color-line-strong) var(--color-bg);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+  }
+  body {
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  /* Your selection and your focus are drawn in your color */
+  ::selection {
+    background: var(--color-peer);
+    color: var(--color-accent-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-peer);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+  h1, h2, h3 { text-wrap: balance; }
+  p { text-wrap: pretty; }
+}
+
+@utility dot-grid {
+  background-image: radial-gradient(circle at center, color-mix(in oklab, var(--color-fg) 13%, transparent) 1px, transparent 1.4px);
+  background-size: 24px 24px;
+}
+@utility dot-grid-peer {
+  background-image: radial-gradient(circle at center, var(--color-peer) 1.3px, transparent 1.8px);
+  background-size: 24px 24px;
+}
+
+/* ---------- SyncSpace architecture figure: an edit travelling through the system ---------- */
+@layer components {
+  .packet {
+    stroke: var(--ping);
+    stroke-dasharray: 28 400;
+    stroke-dashoffset: 32;
+  }
+  [data-phase="a"] { --ping: var(--color-peer); }
+  [data-phase="b"] { --ping: var(--color-accent); }
+
+  [data-phase="a"] [data-wire="in-1"] .packet,
+  [data-phase="b"] [data-wire="in-0"] .packet {
+    animation: packet 700ms var(--ease-in-out-cubic) 150ms;
+  }
+  [data-phase="a"] :is([data-wire="out-0"], [data-wire="out-1"]) .packet,
+  [data-phase="b"] [data-wire="out-2"] .packet {
+    animation: packet 700ms var(--ease-in-out-cubic) 1000ms;
+  }
+
+  [data-phase="a"] [data-node="you"] { animation: ping-a 900ms ease-out; }
+  [data-phase="b"] [data-node="me"] { animation: ping-b 900ms ease-out; }
+  [data-phase="a"] [data-node="server"] { animation: ping-a 900ms ease-out 800ms; }
+  [data-phase="b"] [data-node="server"] { animation: ping-b 900ms ease-out 800ms; }
+  [data-phase="a"] :is([data-node="snapshots"], [data-node="log"]) { animation: ping-a 900ms ease-out 1650ms; }
+  [data-phase="b"] [data-node="sandbox"] { animation: ping-b 900ms ease-out 1650ms; }
+}
+
+@keyframes packet {
+  from { stroke-dashoffset: 32; }
+  to { stroke-dashoffset: calc(var(--len, 100) * -1px); }
+}
+/* Two identical keyframes so the shared server node restarts its ping on every phase change */
+@keyframes ping-a {
+  from { border-color: var(--ping); box-shadow: 0 0 0 0 color-mix(in oklab, var(--ping) 50%, transparent); }
+  to { border-color: var(--color-line-strong); box-shadow: 0 0 0 9px transparent; }
+}
+@keyframes ping-b {
+  from { border-color: var(--ping); box-shadow: 0 0 0 0 color-mix(in oklab, var(--ping) 50%, transparent); }
+  to { border-color: var(--color-line-strong); box-shadow: 0 0 0 9px transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+}
