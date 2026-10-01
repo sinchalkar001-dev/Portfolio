@@ -3,23 +3,129 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sinchal Kar | Full-Stack Developer</title>
-    <meta
-      name="description"
-      content="Sinchal Kar is a full-stack developer (React, Node.js, Express, MongoDB) who builds real-time and high-concurrency web apps. Web Development Intern at Axlero, B.Tech CSE at KIIT, class of 2026."
-    />
-    <meta name="theme-color" content="#0b0c0e" />
+    <title>{{title}}</title>
+    <meta name="description" content="{{description}}" />
+    <link rel="canonical" href="{{url}}/" />
+    <meta name="theme-color" content="#12162b" />
     <meta name="color-scheme" content="dark" />
+
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Sinchal Kar | Full-Stack Developer" />
-    <meta
-      property="og:description"
-      content="Real-time collaborative apps, fast MongoDB queries and APIs tested under concurrent load."
-    />
+    <meta property="og:site_name" content="{{name}}" />
+    <meta property="og:title" content="{{title}}" />
+    <meta property="og:description" content="{{description}}" />
+    <meta property="og:url" content="{{url}}/" />
+    <meta property="og:image" content="{{ogImage}}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="{{ogImageAlt}}" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="{{title}}" />
+    <meta name="twitter:description" content="{{description}}" />
+    <meta name="twitter:image" content="{{ogImage}}" />
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link
+      rel="preload"
+      href="/src/assets/fonts/archivo-latin-wdth-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <!-- The font and the preloader are styled here so they can paint before the app's script arrives. -->
+    <style>
+      @font-face {
+        font-family: "Archivo";
+        font-style: normal;
+        font-display: swap;
+        font-weight: 100 900;
+        font-stretch: 62% 125%;
+        src: url("/src/assets/fonts/archivo-latin-wdth-normal.woff2") format("woff2");
+      }
+      html {
+        background: #12162b;
+      }
+      #intro {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: grid;
+        place-items: center;
+        background: #12162b;
+        color: #edeae3;
+        transition: transform 0.4s cubic-bezier(0.76, 0, 0.24, 1);
+      }
+      #intro.is-leaving {
+        transform: translateY(-100%);
+      }
+      .no-intro #intro {
+        display: none;
+      }
+      .intro-word {
+        display: flex;
+        overflow: hidden;
+        font-family: "Archivo", ui-sans-serif, system-ui, sans-serif;
+        font-size: clamp(3.75rem, 17vw, 13rem);
+        font-stretch: 65%;
+        font-weight: 800;
+        line-height: 0.8;
+        letter-spacing: -0.02em;
+        text-transform: uppercase;
+      }
+      .intro-word span {
+        transform: translateY(105%);
+        animation: intro-letter 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation-delay: calc(var(--i) * 40ms);
+      }
+      @keyframes intro-letter {
+        to {
+          transform: none;
+        }
+      }
+    </style>
+    <script>
+      // The preloader is shown once per session, and never to someone who has asked for reduced motion.
+      (function () {
+        var root = document.documentElement;
+        try {
+          if (sessionStorage.getItem("intro-seen") || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            root.classList.add("no-intro");
+          }
+        } catch (error) {
+          root.classList.add("no-intro");
+        }
+        window.__introStart = performance.now();
+
+        // The hero photo is the largest thing on the home page, so start fetching it before the app loads.
+        if (location.pathname === "/") {
+          var link = document.createElement("link");
+          link.rel = "preload";
+          link.as = "image";
+          link.href = "{{heroPhoto}}";
+          link.imageSrcset = "{{heroPhotoSrcSet}}";
+          link.imageSizes = "(min-width: 64rem) clamp(16rem, 26vw, 24.5rem), min(66vw, 19rem)";
+          link.fetchPriority = "high";
+          document.head.appendChild(link);
+        }
+      })();
+    </script>
   </head>
   <body>
+    <div id="intro" aria-hidden="true">
+      <span class="intro-word">{{preloaderLetters}}</span>
+    </div>
     <div id="root"></div>
+    <noscript>
+      <style>
+        #intro {
+          display: none;
+        }
+      </style>
+      <p style="margin: 2rem; color: #edeae3; font-family: system-ui, sans-serif">
+        This site needs JavaScript to run. You can reach me at {{email}}.
+      </p>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
