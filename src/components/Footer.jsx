@@ -8,7 +8,7 @@ import { Logo, SectionLink, SocialLinks } from "./ui";
 export default function Footer() {
   const scroll = useScroll();
   const nameRef = useRef(null);
-  useFitText(nameRef, { bleedStart: 0.023, bleedEnd: -0.005 });
+  useFitText(nameRef, { id: "footer-name", bleedStart: 0.023, bleedEnd: -0.005, lazy: true });
 
   return (
     <footer className="border-t border-line">

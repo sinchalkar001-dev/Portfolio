@@ -1,9 +1,9 @@
 import { Button } from "../components/ui";
 import { labels, site } from "../data/portfolio";
-import { useDocumentTitle } from "../lib/hooks";
+import { usePageMeta } from "../lib/hooks";
 
 export default function NotFound() {
-  useDocumentTitle(`${labels.notFoundTitle} | ${site.name}`);
+  usePageMeta(`${labels.notFoundTitle} | ${site.name}`);
   return (
     <section className="container-page flex min-h-[80svh] flex-col items-start justify-center pt-(--header-h)">
       <h1 className="display text-d1">{labels.notFoundTitle}</h1>

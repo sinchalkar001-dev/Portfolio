@@ -6,7 +6,7 @@ import Lightbox from "../components/Lightbox";
 import Proof from "../components/proofs";
 import { Button, SectionLink } from "../components/ui";
 import { caseStudy, labels, projectBySlug, projects, site } from "../data/portfolio";
-import { cx, useDocumentTitle } from "../lib/hooks";
+import { cx, usePageMeta } from "../lib/hooks";
 import NotFound from "./NotFound";
 
 export default function CaseStudy() {
@@ -18,7 +18,7 @@ export default function CaseStudy() {
 function CaseStudyPage({ project }) {
   const { title, tagline, tags, status, result, links = {}, cover, proof, architecture, screenshots = [] } = project;
   const [openImage, setOpenImage] = useState(null);
-  useDocumentTitle(`${title}: ${tagline} | ${site.name}`);
+  usePageMeta(`${title}: ${tagline} | ${site.name}`);
 
   // Every picture of the project, cover first, each one once. The first is shown large under the header.
   const images = [cover, ...screenshots].filter(

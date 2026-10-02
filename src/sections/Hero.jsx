@@ -4,7 +4,7 @@ import CoEditStatement from "../components/CoEditStatement";
 import CountUp from "../components/CountUp";
 import { Button } from "../components/ui";
 import { hero } from "../data/portfolio";
-import { usePrefersReducedMotion } from "../lib/hooks";
+import { useOnScreen, usePrefersReducedMotion } from "../lib/hooks";
 import { useIntroDone } from "../lib/intro";
 import { gsap, useGSAP } from "../lib/motion";
 import { useScroll } from "../lib/scroll";
@@ -24,39 +24,66 @@ export default function Hero() {
   const boxRef = useRef(null);
   const wordRef = useRef(null);
   const timeline = useRef(null);
+  const onScreen = useOnScreen(scope, "0px");
   const [seenBefore] = useState(entrancePlayed);
   const still = reduced || seenBefore;
   const [settled, setSettled] = useState(still);
 
   // The giant word is fitted to the page width, and the row below hangs off its size:
   // the photo is lifted by the height of the letters and centred on one of them.
-  const onFit = useCallback((size, word) => {
-    const box = boxRef.current;
+  // `measure` finds that letter's centre before the word is resized; it then scales with the word.
+  const measure = useCallback((word, wordRect) => {
     const letter = word.children[hero.headOverLetter - 1];
-    box.style.setProperty("--word-size", `${size}px`);
-    if (letter) {
-      const { left, width } = letter.getBoundingClientRect();
-      box.style.setProperty("--head-x", `${left + width / 2 - box.getBoundingClientRect().left}px`);
-    }
+    if (!letter) return null;
+    const { left, width } = letter.getBoundingClientRect();
+    return left + width / 2 - wordRect.left;
   }, []);
-  useFitText(wordRef, { bleedStart: 0.044, bleedEnd: -0.003, onFit });
+  const onFit = useCallback(({ size, scale, offset, extra: letterCentre }) => {
+    const box = boxRef.current;
+    box.style.setProperty("--word-size", `${size}px`);
+    if (letterCentre !== null) box.style.setProperty("--head-x", `${offset + letterCentre * scale}px`);
+  }, []);
+  useFitText(wordRef, { id: "hero-word", bleedStart: 0.044, bleedEnd: -0.003, measure, onFit });
 
   // One orchestrated entrance: the word rises letter by letter, the photo rises out of its card, the text follows.
+  // Until a piece starts moving it is hidden by a CSS rule (data-entrance="pending"), and nothing here
+  // renders until the timeline plays, so building it costs the page no layout work while it mounts.
   useGSAP(
     () => {
       if (still) return;
+      const shown = { visibility: "visible" };
       timeline.current = gsap
         .timeline({
           paused: true,
+          defaults: { immediateRender: false },
           onComplete: () => {
             entrancePlayed = true;
             setSettled(true);
           },
         })
-        .from("[data-hero-letter]", { yPercent: 108, duration: 0.95, ease: "expo.out", stagger: 0.04 })
-        .from("[data-hero-card]", { autoAlpha: 0, y: 36, duration: 0.8, ease: "power3.out" }, 0.18)
-        .from("[data-hero-photo]", { yPercent: 101, duration: 1.2, ease: "expo.out" }, 0.24)
-        .from("[data-hero-text]", { autoAlpha: 0, y: 24, duration: 0.7, ease: "power3.out", stagger: 0.06 }, 0.4);
+        .fromTo(
+          "[data-hero-letter]",
+          { yPercent: 108, ...shown },
+          { yPercent: 0, ...shown, duration: 0.95, ease: "expo.out", stagger: 0.04 },
+        )
+        .fromTo(
+          "[data-hero-card]",
+          { autoAlpha: 0, y: 36 },
+          { autoAlpha: 1, y: 0, duration: 0.8, ease: "power3.out" },
+          0.18,
+        )
+        .fromTo(
+          "[data-hero-photo]",
+          { yPercent: 101, ...shown },
+          { yPercent: 0, ...shown, duration: 1.2, ease: "expo.out" },
+          0.24,
+        )
+        .fromTo(
+          "[data-hero-text]",
+          { autoAlpha: 0, y: 24 },
+          { autoAlpha: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.06 },
+          0.4,
+        );
       return () => (timeline.current = null);
     },
     { scope, dependencies: [still] },
@@ -72,8 +99,14 @@ export default function Hero() {
     <section
       id="top"
       ref={scope}
-      className="overflow-x-clip pt-[calc(var(--header-h)+1.25rem)] lg:pt-[calc(var(--header-h)+2rem)]"
+      data-entrance={still || settled ? undefined : "pending"}
+      className="hero relative isolate overflow-x-clip pt-[calc(var(--header-h)+1.25rem)] lg:pt-[calc(var(--header-h)+2rem)]"
     >
+      <div aria-hidden="true" className="dot-field" data-resting={!onScreen || undefined}>
+        <i />
+        <i />
+        <i />
+      </div>
       <div className="container-page">
         <div ref={boxRef} className="@container">
           {/* Clipped vertically only: it is the mask the letters rise out of. */}

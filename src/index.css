@@ -145,6 +145,11 @@
     display: inline-block;
     will-change: transform;
   }
+  /* Before the entrance, each moving piece is hidden here rather than from script.
+     The timeline makes a piece visible at the moment it starts to move. */
+  .hero[data-entrance="pending"] :is([data-hero-letter], [data-hero-card], [data-hero-photo], [data-hero-text]) {
+    visibility: hidden;
+  }
   .hero-row {
     display: flex;
     flex-direction: column;
@@ -180,7 +185,47 @@
     }
     /* The head stands where this letter would be, so the letter itself steps aside. */
     .hero-letter[data-behind-photo] {
-      visibility: hidden;
+      opacity: 0;
+    }
+  }
+
+  /* ---------- Dot field ----------
+     The preloader's background, carried on behind the hero so the curtain lifts onto the same field.
+     Sparse groups of dots light up slowly; each brighter layer lands exactly on the base grid
+     (its tiles are odd multiples of the 28px spacing). */
+  .dot-field {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(circle, var(--color-line) 1px, transparent 1.6px) 0 0 / 28px 28px;
+    mask-image: linear-gradient(to bottom, #000 45%, transparent 94%);
+  }
+  .dot-field i {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    animation: twinkle 7s ease-in-out infinite;
+  }
+  .dot-field i:nth-child(1) {
+    background: radial-gradient(circle, var(--color-line-strong) 1.3px, transparent 1.9px) 0 0 / 140px 84px;
+  }
+  .dot-field i:nth-child(2) {
+    background: radial-gradient(circle, var(--color-line-strong) 1.3px, transparent 1.9px) 56px 28px / 196px 140px;
+    animation-duration: 9s;
+    animation-delay: -3s;
+  }
+  .dot-field i:nth-child(3) {
+    background: radial-gradient(circle, var(--color-accent) 1.6px, transparent 2.2px) 84px 56px / 364px 252px;
+    animation-duration: 11s;
+    animation-delay: -6s;
+  }
+  .dot-field[data-resting] i {
+    animation-play-state: paused;
+  }
+  @keyframes twinkle {
+    50% {
+      opacity: 1;
     }
   }
 
@@ -300,6 +345,9 @@
     transition-duration: 0s !important;
     transition-delay: 0s !important;
     scroll-behavior: auto !important;
+  }
+  .dot-field i {
+    animation: none !important;
   }
   /* A stopped marquee would hide most of its list, so let it wrap instead. */
   .marquee__track {

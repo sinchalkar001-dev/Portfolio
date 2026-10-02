@@ -12,6 +12,8 @@ const escapeHtml = (text) =>
 function siteMeta() {
   const values = {
     name: site.name,
+    monogram: site.monogram,
+    role: site.role,
     title: site.title,
     description: site.description,
     url: site.url,
@@ -22,7 +24,7 @@ function siteMeta() {
     heroPhotoSrcSet: hero.photo.srcSet ?? "",
   };
   const letters = [...labels.preloader]
-    .map((letter, i) => `<span style="--i:${i}">${escapeHtml(letter)}</span>`)
+    .map((letter, i) => `<span class="intro-l" style="--i:${i}">${escapeHtml(letter)}</span>`)
     .join("");
   const pages = ["/", ...projects.items.map((project) => `/projects/${project.slug}`)];
 

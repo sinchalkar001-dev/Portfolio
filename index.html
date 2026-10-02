@@ -46,54 +46,258 @@
       html {
         background: #12162b;
       }
+
+      /* ---- Preloader: on screen for every load, lifted by the app once it is ready ----
+         One number drives it: --p runs from 0 to 1 and is set by the small script below the markup.
+         The count, the line and the fill of the word all read that same number. */
       #intro {
         position: fixed;
         inset: 0;
         z-index: 100;
-        display: grid;
-        place-items: center;
-        background: #12162b;
+        overflow: hidden;
         color: #edeae3;
-        transition: transform 0.4s cubic-bezier(0.76, 0, 0.24, 1);
-      }
-      #intro.is-leaving {
-        transform: translateY(-100%);
+        font-family: "Archivo", ui-sans-serif, system-ui, sans-serif;
       }
       .no-intro #intro {
         display: none;
       }
-      .intro-word {
+
+      /* The curtain is five columns, a shade lighter than the page, each with an amber lower edge.
+         They lift one after another, so the edge draws a rising staircase across the screen. */
+      .intro-panels {
+        position: absolute;
+        inset: 0;
         display: flex;
+      }
+      .intro-panels i {
+        flex: 1;
+        margin-right: -1px;
+        background: #1c2140;
+        box-shadow: 0 4px 0 #f5b83d;
+        transition: transform 0.65s cubic-bezier(0.76, 0, 0.24, 1);
+        transition-delay: calc(var(--n) * 60ms + 200ms);
+      }
+      #intro.is-leaving .intro-panels i {
+        transform: translateY(-102%);
+      }
+
+      /* A field of dots: many things happening at once. Sparse groups of them light up in turn.
+         Every brighter layer lands exactly on the base grid (its tiles are odd multiples of 28px). */
+      .intro-dots {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle, #343b66 1px, transparent 1.6px) 0 0 / 28px 28px;
+        transition: opacity 0.25s;
+      }
+      .intro-dots i {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        animation: intro-twinkle 1.4s ease-in-out infinite;
+      }
+      .intro-dots i:nth-child(1) {
+        background: radial-gradient(circle, #9aa0b8 1.3px, transparent 1.9px) 0 0 / 140px 84px;
+      }
+      .intro-dots i:nth-child(2) {
+        background: radial-gradient(circle, #9aa0b8 1.3px, transparent 1.9px) 56px 28px / 196px 140px;
+        animation-duration: 1.8s;
+        animation-delay: 0.3s;
+      }
+      .intro-dots i:nth-child(3) {
+        background: radial-gradient(circle, #f5b83d 1.6px, transparent 2.2px) 84px 56px / 364px 252px;
+        animation-duration: 2.2s;
+        animation-delay: 0.55s;
+      }
+      #intro.is-leaving .intro-dots {
+        opacity: 0;
+      }
+
+      /* The logo sits exactly where the page header puts it, so it seems to stay put as the curtain lifts. */
+      .intro-logo {
+        position: absolute;
+        inset: 0 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        height: 4.5rem;
+        max-width: 96rem;
+        margin-inline: auto;
+        padding-inline: 1.25rem;
+        font-size: 1.0625rem;
+        font-weight: 600;
+        line-height: 1;
+        white-space: nowrap;
+      }
+      .intro-logo b {
+        display: grid;
+        place-items: center;
+        box-sizing: border-box;
+        width: 2.5rem;
+        height: 2.5rem;
+        border: 2px solid #edeae3;
+        border-radius: 0.625rem;
+        font-size: 1.25rem;
+        font-stretch: 65%;
+        font-weight: 800;
+      }
+
+      /* The word starts as an outline and fills from the left as the count climbs. */
+      .intro-center {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-content: center;
+      }
+      .intro-stack {
+        display: grid;
+        gap: clamp(0.75rem, 2.2vw, 1.75rem);
+      }
+      .intro-word {
+        position: relative;
+        display: block;
         overflow: hidden;
-        font-family: "Archivo", ui-sans-serif, system-ui, sans-serif;
         font-size: clamp(3.75rem, 17vw, 13rem);
         font-stretch: 65%;
         font-weight: 800;
         line-height: 0.8;
         letter-spacing: -0.02em;
         text-transform: uppercase;
+        white-space: nowrap;
       }
-      .intro-word span {
-        transform: translateY(105%);
-        animation: intro-letter 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        animation-delay: calc(var(--i) * 40ms);
+      .intro-outline {
+        display: block;
+        color: transparent;
+        -webkit-text-stroke: 1.5px #edeae3;
       }
-      @keyframes intro-letter {
+      /* A window that slides open from the left; its contents slide the other way and so stay still. */
+      .intro-fill {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        transform: translateX(calc((var(--p, 0) - 1) * 100%));
+      }
+      .intro-fill > span {
+        display: block;
+        transform: translateX(calc((1 - var(--p, 0)) * 100%));
+      }
+      .intro-l {
+        display: inline-block;
+        animation: intro-rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+        animation-delay: calc(var(--i) * 45ms + 60ms);
+      }
+      #intro.is-leaving .intro-l {
+        animation: intro-exit 0.32s cubic-bezier(0.7, 0, 0.84, 0) both;
+        animation-delay: calc(var(--i) * 18ms + 120ms);
+      }
+      .intro-line {
+        height: 3px;
+        overflow: hidden;
+        border-radius: 3px;
+        background: #343b66;
+        transition: opacity 0.2s 0.15s;
+      }
+      .intro-line i {
+        display: block;
+        height: 100%;
+        background: #f5b83d;
+        transform: scaleX(var(--p, 0));
+        transform-origin: left;
+      }
+      #intro.is-leaving .intro-line {
+        opacity: 0;
+      }
+
+      /* Role on the left behind a turning plus sign, the count on the right. */
+      .intro-foot {
+        position: absolute;
+        inset: auto 0 0;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1rem;
+        max-width: 96rem;
+        margin-inline: auto;
+        padding: 0 1.25rem 1.5rem;
+        transition:
+          opacity 0.2s 0.1s,
+          transform 0.2s 0.1s;
+      }
+      .intro-role {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        color: #9aa0b8;
+        font-size: 0.9375rem;
+      }
+      .intro-plus {
+        position: relative;
+        width: 0.875rem;
+        height: 0.875rem;
+        animation: intro-turn 1.2s cubic-bezier(0.76, 0, 0.24, 1) infinite;
+      }
+      .intro-plus::before,
+      .intro-plus::after {
+        content: "";
+        position: absolute;
+        inset: calc(50% - 1px) 0 auto;
+        height: 2px;
+        border-radius: 2px;
+        background: #f5b83d;
+      }
+      .intro-plus::after {
+        transform: rotate(90deg);
+      }
+      .intro-count {
+        font-size: clamp(2.75rem, 9vw, 5.5rem);
+        font-stretch: 65%;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+        line-height: 0.8;
+        letter-spacing: -0.015em;
+      }
+      #intro.is-leaving .intro-foot {
+        opacity: 0;
+        transform: translateY(1rem);
+      }
+
+      @media (min-width: 40rem) {
+        .intro-logo,
+        .intro-foot {
+          padding-inline: 2rem;
+        }
+      }
+      @media (min-width: 80rem) {
+        .intro-logo,
+        .intro-foot {
+          padding-inline: 2.5rem;
+        }
+      }
+      @keyframes intro-twinkle {
+        50% {
+          opacity: 1;
+        }
+      }
+      @keyframes intro-rise {
+        from {
+          transform: translateY(105%);
+        }
+      }
+      @keyframes intro-exit {
         to {
-          transform: none;
+          transform: translateY(-105%);
+        }
+      }
+      @keyframes intro-turn {
+        to {
+          transform: rotate(180deg);
         }
       }
     </style>
     <script>
-      // The preloader is shown once per session, and never to someone who has asked for reduced motion.
+      // The preloader shows on every load, except for someone who has asked for reduced motion.
       (function () {
-        var root = document.documentElement;
-        try {
-          if (sessionStorage.getItem("intro-seen") || matchMedia("(prefers-reduced-motion: reduce)").matches) {
-            root.classList.add("no-intro");
-          }
-        } catch (error) {
-          root.classList.add("no-intro");
+        if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          document.documentElement.classList.add("no-intro");
         }
         window.__introStart = performance.now();
 
@@ -113,8 +317,54 @@
   </head>
   <body>
     <div id="intro" aria-hidden="true">
-      <span class="intro-word">{{preloaderLetters}}</span>
+      <div class="intro-panels">
+        <i style="--n: 0"></i><i style="--n: 1"></i><i style="--n: 2"></i><i style="--n: 3"></i><i style="--n: 4"></i>
+      </div>
+      <div class="intro-dots"><i></i><i></i><i></i></div>
+      <div class="intro-logo"><b>{{monogram}}</b>{{name}}</div>
+      <div class="intro-center">
+        <div class="intro-stack">
+          <div class="intro-word">
+            <span class="intro-outline">{{preloaderLetters}}</span>
+            <span class="intro-fill"><span>{{preloaderLetters}}</span></span>
+          </div>
+          <div class="intro-line"><i></i></div>
+        </div>
+      </div>
+      <div class="intro-foot">
+        <span class="intro-role"><span class="intro-plus"></span>{{role}}</span>
+        <span class="intro-count"><span id="intro-count">0</span>%</span>
+      </div>
     </div>
+    <script>
+      // Progress eases towards 99% while the page gets ready (it cannot be measured, so it never claims 100
+      // early), then runs to 100 as the curtain starts to lift.
+      (function () {
+        var intro = document.getElementById("intro");
+        var count = document.getElementById("intro-count");
+        if (document.documentElement.classList.contains("no-intro")) return;
+        var start = performance.now();
+        var shown = 0;
+        var leftAt = 0;
+        var leftFrom = 0;
+        requestAnimationFrame(function tick(now) {
+          if (!intro.isConnected) return;
+          if (intro.classList.contains("is-leaving")) {
+            if (!leftAt) {
+              leftAt = now;
+              leftFrom = shown;
+            }
+            shown = leftFrom + (1 - leftFrom) * Math.min(1, (now - leftAt) / 160);
+          } else {
+            shown = 0.99 * (1 - Math.exp(-Math.max(0, now - start) / 360));
+          }
+          intro.style.setProperty("--p", shown.toFixed(4));
+          var text = String(Math.round(shown * 100));
+          if (count.textContent !== text) count.textContent = text;
+          if (shown < 1) requestAnimationFrame(tick);
+        });
+      })();
+    </script>
     <div id="root"></div>
     <noscript>
       <style>

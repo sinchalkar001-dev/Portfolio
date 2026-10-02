@@ -63,6 +63,12 @@ function RouteScroll() {
     let frame = 0;
     let tries = 0;
 
+    // A fresh load with no #hash is already at the top: nothing to place, nothing to measure.
+    if (firstRender.current && !id) {
+      firstRender.current = false;
+      return;
+    }
+
     // A lazy route may not have rendered yet, so retry for a moment until the target exists.
     const settle = () => {
       const target = id ? document.getElementById(id) : null;
