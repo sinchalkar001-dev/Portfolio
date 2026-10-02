@@ -213,7 +213,26 @@ export const techStack = {
 //   screenshots  Gallery on the case-study page. Leave the list empty and the gallery is hidden.
 //   proof        The animated evidence for the result. Shown on the case-study page.
 //   links        Any link left out hides its button.
-const shot = (slug, file, alt) => ({ src: `/projects/${slug}/${file}.webp`, width: 1600, height: 1000, alt });
+//   alt      what the picture shows, for people who cannot see it
+//   title    optional heading shown under the picture
+//   caption  optional description shown under the picture
+const shot = (slug, file, alt, title, caption) => ({
+  src: `/projects/${slug}/${file}.webp`,
+  width: 1600,
+  height: 1000,
+  alt,
+  title,
+  caption,
+});
+
+// SyncSpace's cover: the picture on its home-page card and the large one at the top of its case study.
+const syncspaceCover = shot(
+  "syncspace",
+  "01-room",
+  "A SyncSpace room with two people in it: an architecture sketch on the shared whiteboard, a guest's live cursor, and the code editor showing the output of a run",
+  "A whiteboard and a code editor in one room",
+  "Two people draw and type in the same room at the same time. Each sees the other's cursor, edits merge through Yjs CRDTs instead of overwriting each other, and a run's output is shown to everyone.",
+);
 
 export const projects = {
   heading: "Selected work",
@@ -233,11 +252,7 @@ export const projects = {
         live: "https://sync-space-client-gray.vercel.app",
         github: "https://github.com/sinchalkar001-dev/SyncSpace",
       },
-      cover: shot(
-        "syncspace",
-        "01-room",
-        "A SyncSpace room with two people in it: an architecture sketch on the shared whiteboard, a guest's live cursor, and the code editor showing the output of a run",
-      ),
+      cover: syncspaceCover,
       overview:
         "SyncSpace is a shared whiteboard and code editor that several people can use in the same room at the same time. I built it during my internship at Axlero Innovative Solutions and took it from a written specification to a live deployment.",
       built:
@@ -277,28 +292,107 @@ export const projects = {
         },
       ],
       stack: ["React", "Yjs", "WebSockets", "Socket.io", "Node.js", "Express", "MongoDB", "Docker", "Playwright", "Vercel", "Render"],
+      // One picture per feature. Each has a title and a description, shown under it and in the full-screen viewer.
       screenshots: [
+        syncspaceCover,
         shot(
           "syncspace",
-          "01-room",
-          "A SyncSpace room with two people in it: an architecture sketch on the shared whiteboard, a guest's live cursor, and the code editor showing the output of a run",
+          "06-chat",
+          "A SyncSpace room with the chat panel open: four messages between Sinchal Kar and Priya about a declined card, above the shared board and code",
+          "Live chat",
+          "Messages reach everyone in the room over Socket.io, without leaving the board. They are live only: nothing is stored, and an unread count on the button catches whatever arrives while the panel is shut.",
+        ),
+        shot(
+          "syncspace",
+          "07-comments",
+          "The SyncSpace comments panel with two open threads, one on line 5 of the code and one on the Payments shape, which carries a pin counting two messages",
+          "Comments on shapes, code and files",
+          "Threads are pinned to a shape, a line of code or a shared file, with replies, @mentions and resolve. A code comment is anchored to the characters themselves, so it stays with its code as lines are added above it.",
+        ),
+        shot(
+          "syncspace",
+          "08-copilot",
+          "The SyncSpace copilot panel in its whiteboard context, offering to explain or review the architecture, generate code or an API, find risks and plan the implementation",
+          "Engineering copilot",
+          "One panel that offers what fits the work in front of you: explain or review the architecture on the board, find a bug in the code, diagnose a failed run, summarise the session. It lists what it read, and nothing it proposes is applied without review.",
+        ),
+        shot(
+          "syncspace",
+          "09-people",
+          "The SyncSpace roster: the owner and an editor in the room now, a member who is away with the Runner role, a pending invitation, and a field to invite by email",
+          "People, roles and invitations",
+          "The roster shows who is in the room and what each person is doing, with follow and go-to. Six roles from viewer to owner are enforced on the server, including a runner who may run the code but not change it. An invitation is tied to one address and expires.",
+        ),
+        shot(
+          "syncspace",
+          "10-files",
+          "The SyncSpace files panel listing three shared files, a text schema, a PNG and a Markdown note, each with save and comment controls",
+          "Shared files",
+          "Images, PDFs and text files up to 10 MB, shared with everyone in the room. Each file can carry its own comment thread.",
         ),
         shot(
           "syncspace",
           "02-history",
-          "SyncSpace room history: a scrubber that replays every recorded change to the board and the code",
+          "SyncSpace room history paused at change 180 of 506: the finished diagram beside code that is still only six lines long",
+          "Room history",
+          "Every change is appended to a log, so a room can be replayed from its first stroke. Dragging the scrubber rebuilds the board and the code as they stood at that change.",
+        ),
+        shot(
+          "syncspace",
+          "11-timeline",
+          "SyncSpace room history with the session timeline open: components added and connected, code added, a successful run, chat and comments, each with its time",
+          "Session timeline",
+          "Built from the room's own record, with no model involved: what was drawn and connected, which functions were added, which runs passed, who commented. Each entry jumps the replay to that moment.",
+        ),
+        shot(
+          "syncspace",
+          "12-palette",
+          "The SyncSpace command palette listing view and board commands with their keyboard shortcuts",
+          "Command palette",
+          "Ctrl+K lists the room's commands: switch the view, pick a drawing tool, run the code, change the language, open the history or the copilot.",
+        ),
+        shot(
+          "syncspace",
+          "13-dashboard",
+          "The SyncSpace dashboard for a signed-in user: a room to resume, three rooms filtered by type, and a feed of recent activity",
+          "Dashboard",
+          "Signed-in users get their rooms, filtered by type, with who is in each one and a feed of recent activity. Rooms are private and invite-only until their owner makes them public.",
+        ),
+        shot(
+          "syncspace",
+          "14-devices",
+          "The SyncSpace signed-in devices dialog listing Safari on iPhone and Chrome on Windows, the second marked as this device",
+          "Signed-in devices",
+          "Every browser holding a session for the account. Signing one out takes effect at once: its live document and presence connections are closed on the spot.",
+        ),
+        shot(
+          "syncspace",
+          "15-api-docs",
+          "The Swagger page for the SyncSpace API, listing the health and auth endpoints",
+          "API documentation",
+          "The REST API is described in OpenAPI and served as a browsable page by the API itself: accounts, rooms, invitations and replay.",
         ),
         shot(
           "syncspace",
           "05-ci",
           "GitHub Actions run for SyncSpace with all four jobs passing: secret scan, client, server and end-to-end tests",
+          "Continuous integration",
+          "GitHub Actions runs four jobs on every push: a secret scan, the client tests, the server tests, and Playwright end-to-end tests that drive two browsers.",
         ),
         shot(
           "syncspace",
           "03-home",
           "SyncSpace home page: Draw and code in the same room, with a form to start or join a public room",
+          "Landing page",
+          "Anyone can start or join a public room as a guest, with no account. Signing in adds private rooms, invitations and the dashboard.",
         ),
-        shot("syncspace", "04-features", "Lower part of the SyncSpace home page: a preview of a room above its four features"),
+        shot(
+          "syncspace",
+          "04-features",
+          "Lower part of the SyncSpace home page: a preview of a room above its four features",
+          "What it is built on",
+          "The four ideas the landing page leads with: conflict-free merging, live cursors and carets, a history that can be replayed, and rooms that are private until they are shared.",
+        ),
       ],
     },
     {
