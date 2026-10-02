@@ -82,7 +82,10 @@ export default function Lightbox({ images, index, onIndex, onClose }) {
           </div>
 
           <div className="flex items-center justify-between gap-4">
-            <p className="max-w-[70ch] text-small leading-normal text-muted">{image.alt}</p>
+            <p className="max-w-[80ch] text-small leading-normal text-muted">
+              {image.title && <span className="font-semibold text-fg">{image.title}. </span>}
+              {image.caption ?? image.alt}
+            </p>
             {images.length > 1 && (
               <div className="flex shrink-0 gap-3">
                 <button type="button" className={CONTROL} onClick={() => step(-1)}>

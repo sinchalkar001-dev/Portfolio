@@ -53,7 +53,27 @@ function RouteScroll() {
     ScrollTrigger.clearScrollMemory("manual");
     const remember = () => positions.set(currentKey.current, window.scrollY);
     window.addEventListener("scroll", remember, { passive: true });
-    return () => window.removeEventListener("scroll", remember);
+
+    // Scroll-linked animations keep the positions they measured. When the page changes height
+    // (sections arriving, text being re-fitted), have them measure again once it has settled.
+    let settled = 0;
+    let reported = false;
+    const heightWatcher = new ResizeObserver(() => {
+      // The first report is only the current size.
+      if (!reported) {
+        reported = true;
+        return;
+      }
+      clearTimeout(settled);
+      settled = setTimeout(() => ScrollTrigger.refresh(true), 200);
+    });
+    heightWatcher.observe(document.body);
+
+    return () => {
+      window.removeEventListener("scroll", remember);
+      heightWatcher.disconnect();
+      clearTimeout(settled);
+    };
   }, []);
 
   useLayoutEffect(() => {

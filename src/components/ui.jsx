@@ -6,32 +6,47 @@ import { cx } from "../lib/hooks";
 import { useScroll } from "../lib/scroll";
 
 const BUTTON_BASE =
-  "inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-full px-6 text-small leading-none font-semibold whitespace-nowrap transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-60";
+  "btn inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-full px-6 text-small leading-none font-semibold whitespace-nowrap transition-colors duration-300 disabled:cursor-not-allowed disabled:opacity-60";
 
+// `--wave` is the colour that fills the button on hover (see "Buttons" in index.css).
 const BUTTON_VARIANTS = {
-  primary: "bg-accent text-ink hover:bg-accent-hover",
-  ghost: "border border-line-strong text-fg hover:border-fg",
+  primary: "bg-accent text-ink [--wave:var(--color-fg)]",
+  ghost:
+    "border border-line-strong text-fg [--wave:var(--color-accent)] hover:border-accent hover:text-ink focus-visible:border-accent focus-visible:text-ink",
+};
+
+// Tells the button where the pointer crossed its edge, so the hover fill grows from that point and shrinks back to it.
+const markPointer = (event) => {
+  const el = event.currentTarget;
+  const box = el.getBoundingClientRect();
+  el.style.setProperty("--wave-x", `${event.clientX - box.left}px`);
+  el.style.setProperty("--wave-y", `${event.clientY - box.top}px`);
 };
 
 // Renders a router link (`to`), a plain link (`href`) or a button, all with the same look.
 export function Button({ variant = "primary", className, to, href, external, children, ...props }) {
-  const classes = cx(BUTTON_BASE, BUTTON_VARIANTS[variant], className);
+  const shared = {
+    className: cx(BUTTON_BASE, BUTTON_VARIANTS[variant], className),
+    onPointerEnter: markPointer,
+    onPointerLeave: markPointer,
+    ...props,
+  };
   if (to) {
     return (
-      <Link to={to} className={classes} {...props}>
+      <Link to={to} {...shared}>
         {children}
       </Link>
     );
   }
   if (href) {
     return (
-      <a href={href} className={classes} {...(external ? { target: "_blank", rel: "noopener noreferrer" } : null)} {...props}>
+      <a href={href} {...(external ? { target: "_blank", rel: "noopener noreferrer" } : null)} {...shared}>
         {children}
       </a>
     );
   }
   return (
-    <button type="button" className={classes} {...props}>
+    <button type="button" {...shared}>
       {children}
     </button>
   );

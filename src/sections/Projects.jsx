@@ -1,17 +1,21 @@
 import { FaGithub } from "react-icons/fa6";
 import { LuArrowUpRight, LuCheck } from "react-icons/lu";
 import Proof from "../components/proofs";
+import RiseWords from "../components/RiseWords";
 import { Button } from "../components/ui";
 import { labels, projects } from "../data/portfolio";
 import { cx } from "../lib/hooks";
+import { reveal } from "../lib/reveal";
 
 export default function Projects() {
   return (
     <section id="projects" tabIndex={-1} className="py-24 focus:outline-none lg:py-28">
       <div className="container-page">
         <div className="flex flex-wrap items-end justify-between gap-x-12 gap-y-4">
-          <h2 className="display text-d2">{projects.heading}</h2>
-          <p className="max-w-[30ch] text-lg text-muted">{projects.intro}</p>
+          <RiseWords text={projects.heading} className="display text-d2" />
+          <p ref={reveal} className="reveal max-w-[30ch] text-lg text-muted" style={{ "--reveal-delay": "150ms" }}>
+            {projects.intro}
+          </p>
         </div>
 
         <div className="mt-10 space-y-6 lg:mt-14 lg:space-y-8">
@@ -30,9 +34,10 @@ function ProjectCard({ project }) {
 
   return (
     <article
+      ref={reveal}
       aria-labelledby={titleId}
       className={cx(
-        "grid overflow-hidden rounded-card bg-raised lg:grid-cols-2",
+        "reveal grid overflow-hidden rounded-card bg-raised lg:grid-cols-2",
         featured && "lg:grid-cols-[minmax(0,7fr)_minmax(0,6fr)]",
       )}
     >
@@ -47,6 +52,7 @@ function ProjectCard({ project }) {
               alt={cover.alt}
               loading="lazy"
               decoding="async"
+              data-reveal-zoom
               className="h-auto w-full"
             />
           ) : (
@@ -77,9 +83,7 @@ function ProjectCard({ project }) {
           </ul>
         </div>
 
-        <h3 id={titleId} className={cx("display mt-7", featured ? "text-d1" : "text-d3")}>
-          {title}
-        </h3>
+        <RiseWords as="h3" id={titleId} text={title} className={cx("display mt-7", featured ? "text-d1" : "text-d3")} />
         <p className="mt-3 text-lg text-muted">{tagline}</p>
         <p className="mt-5 max-w-[60ch]">{summary}</p>
 

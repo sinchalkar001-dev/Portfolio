@@ -5,6 +5,7 @@ import Marquee from "../components/Marquee";
 import { labels, projectBySlug, skills } from "../data/portfolio";
 import { cx, useMediaQuery, usePrefersReducedMotion } from "../lib/hooks";
 import { gsap, useGSAP } from "../lib/motion";
+import { reveal } from "../lib/reveal";
 
 const ROW =
   "group grid items-center gap-x-8 gap-y-5 py-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)_auto] lg:py-11";
@@ -40,9 +41,13 @@ export default function Skills() {
         yTo(y);
       };
       const onLeave = () => (placed = false);
+      // `pointerover` as well: when the page is scrolled under a resting pointer, a row is entered
+      // without the pointer ever moving, and the thumbnail still has to be put beside it.
+      list.addEventListener("pointerover", onMove);
       list.addEventListener("pointermove", onMove);
       list.addEventListener("pointerleave", onLeave);
       return () => {
+        list.removeEventListener("pointerover", onMove);
         list.removeEventListener("pointermove", onMove);
         list.removeEventListener("pointerleave", onLeave);
       };
@@ -53,7 +58,8 @@ export default function Skills() {
   const showing = active !== null && !broken.has(active);
 
   return (
-    <section id="skills" tabIndex={-1} className="py-24 focus:outline-none lg:py-28">
+    // Clipped sideways: the rows slide in from beyond the edges of the page.
+    <section id="skills" tabIndex={-1} className="overflow-x-clip py-24 focus:outline-none lg:py-28">
       <h2 className="sr-only">{skills.heading}</h2>
 
       <Marquee repeat={4} duration={48} className="border-y border-line py-5 lg:py-7">
@@ -106,7 +112,9 @@ export default function Skills() {
             return (
               <li
                 key={group.title}
-                className="border-b border-line"
+                ref={reveal}
+                data-reveal={i % 2 ? "right" : "left"}
+                className="reveal border-b border-line"
                 onPointerEnter={() => {
                   setArmed(true);
                   setActive(i);

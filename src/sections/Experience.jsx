@@ -1,16 +1,19 @@
+import RiseWords from "../components/RiseWords";
 import { experience, labels } from "../data/portfolio";
+import { reveal } from "../lib/reveal";
 
-const ROW = "grid gap-x-10 gap-y-4 border-b border-line py-9 lg:grid-cols-[minmax(0,3fr)_minmax(0,9fr)] lg:py-11";
+const ROW =
+  "reveal grid gap-x-10 gap-y-4 border-b border-line py-9 lg:grid-cols-[minmax(0,3fr)_minmax(0,9fr)] lg:py-11";
 
 export default function Experience() {
   return (
     <section id="experience" tabIndex={-1} className="py-24 focus:outline-none lg:py-28">
       <div className="container-page">
-        <h2 className="display text-d2">{experience.heading}</h2>
+        <RiseWords text={experience.heading} className="display text-d2" />
 
         <ol className="mt-10 border-t border-line lg:mt-14">
           {experience.items.map((item) => (
-            <li key={item.title} className={ROW}>
+            <li key={item.title} ref={reveal} className={ROW}>
               <p className="flex flex-wrap items-center gap-x-4 gap-y-2 self-start text-muted tabular-nums lg:pt-2">
                 {item.period}
                 {item.current && (
@@ -29,7 +32,7 @@ export default function Experience() {
           ))}
         </ol>
 
-        <div className={ROW}>
+        <div ref={reveal} className={ROW}>
           <h3 className="self-start text-muted lg:pt-2">{experience.certificationsHeading}</h3>
           <ul className="space-y-4">
             {experience.certifications.map((cert) => (

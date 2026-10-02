@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { LuPause, LuPlay } from "react-icons/lu";
 import Marquee from "../components/Marquee";
+import RiseWords from "../components/RiseWords";
 import { techIcon } from "../components/techIcons";
 import { labels, techStack } from "../data/portfolio";
 import { usePrefersReducedMotion } from "../lib/hooks";
+import { reveal } from "../lib/reveal";
 
 export default function TechStack() {
   const [paused, setPaused] = useState(false);
@@ -14,21 +16,23 @@ export default function TechStack() {
   return (
     <section id="stack" tabIndex={-1} className="py-24 focus:outline-none lg:py-28">
       <div className="container-page flex items-end justify-between gap-6">
-        <h2 className="display text-d2">{techStack.heading}</h2>
+        <RiseWords text={techStack.heading} className="display text-d2" />
         {!reduced && (
-          <button
-            type="button"
-            aria-pressed={paused}
-            onClick={() => setPaused((value) => !value)}
-            className="grid size-12 shrink-0 cursor-pointer place-items-center rounded-full border border-line-strong transition-colors duration-200 hover:border-accent hover:text-accent"
-          >
-            {paused ? <LuPlay className="size-4" aria-hidden="true" /> : <LuPause className="size-4" aria-hidden="true" />}
-            <span className="sr-only">{paused ? labels.playMarquee : labels.pauseMarquee}</span>
-          </button>
+          <div ref={reveal} className="reveal shrink-0" style={{ "--reveal-delay": "150ms" }}>
+            <button
+              type="button"
+              aria-pressed={paused}
+              onClick={() => setPaused((value) => !value)}
+              className="grid size-12 cursor-pointer place-items-center rounded-full border border-line-strong transition-colors duration-200 hover:border-accent hover:text-accent"
+            >
+              {paused ? <LuPlay className="size-4" aria-hidden="true" /> : <LuPause className="size-4" aria-hidden="true" />}
+              <span className="sr-only">{paused ? labels.playMarquee : labels.pauseMarquee}</span>
+            </button>
+          </div>
         )}
       </div>
 
-      <div className="mt-10 border-y border-line lg:mt-14">
+      <div ref={reveal} className="reveal mt-10 border-y border-line lg:mt-14">
         {rows.map((tools, row) => (
           <Marquee
             key={row}

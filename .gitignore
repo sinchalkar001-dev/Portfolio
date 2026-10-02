@@ -2,3 +2,6 @@ node_modules
 dist
 *.local
 .DS_Store
+
+# Reference recordings and other large videos stay out of the repository
+*.mp4

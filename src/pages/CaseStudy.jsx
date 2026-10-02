@@ -4,10 +4,15 @@ import { FaGithub } from "react-icons/fa6";
 import { LuArrowDown, LuArrowLeft, LuArrowRight, LuArrowUpRight, LuCheck, LuPlus } from "react-icons/lu";
 import Lightbox from "../components/Lightbox";
 import Proof from "../components/proofs";
+import RiseWords from "../components/RiseWords";
 import { Button, SectionLink } from "../components/ui";
 import { caseStudy, labels, projectBySlug, projects, site } from "../data/portfolio";
 import { cx, usePageMeta } from "../lib/hooks";
+import { reveal } from "../lib/reveal";
 import NotFound from "./NotFound";
+
+// How long a block waits before it comes in, so the blocks of the page header arrive as a short sequence.
+const delay = (ms) => ({ "--reveal-delay": `${ms}ms` });
 
 export default function CaseStudy() {
   const { slug } = useParams();
@@ -34,7 +39,7 @@ function CaseStudyPage({ project }) {
         <BackLink />
 
         <header className="mt-8 lg:mt-12">
-          <div className="flex flex-wrap items-center gap-2">
+          <div ref={reveal} className="reveal flex flex-wrap items-center gap-2">
             {status && (
               <span className="inline-flex items-center gap-2 rounded-full bg-accent px-3 py-1.5 text-tiny leading-none font-bold text-ink">
                 <span className="size-1.5 rounded-full bg-ink" aria-hidden="true" />
@@ -53,16 +58,23 @@ function CaseStudyPage({ project }) {
             </ul>
           </div>
 
-          <h1 className="display mt-7 text-[clamp(3rem,10.5vw,9.5rem)] leading-[0.88]">{title}</h1>
-          <p className="mt-5 text-xl text-muted lg:text-2xl">{tagline}</p>
+          <RiseWords
+            as="h1"
+            text={title}
+            className="display mt-7 text-[clamp(3rem,10.5vw,9.5rem)] leading-[0.88]"
+            style={delay(80)}
+          />
+          <p ref={reveal} className="reveal mt-5 text-xl text-muted lg:text-2xl" style={delay(220)}>
+            {tagline}
+          </p>
 
-          <p className="mt-8 flex max-w-[60ch] gap-3 text-lg font-semibold">
+          <p ref={reveal} className="reveal mt-8 flex max-w-[60ch] gap-3 text-lg font-semibold" style={delay(300)}>
             <LuCheck className="mt-[0.2em] size-[1.15em] shrink-0 text-accent" aria-hidden="true" />
             {result}
           </p>
 
           {(links.live || links.github) && (
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div ref={reveal} className="reveal mt-8 flex flex-wrap gap-3" style={delay(380)}>
               {links.live && (
                 <Button href={links.live} external>
                   {labels.liveDemo}
@@ -80,11 +92,13 @@ function CaseStudyPage({ project }) {
         </header>
 
         {images.length > 0 && (
-          <ScreenshotButton
+          <Screenshot
             image={images[0]}
             eager
             onOpen={() => setOpenImage(0)}
-            className="mt-12 rounded-card lg:mt-16"
+            className="mt-12 lg:mt-16"
+            frameClassName="rounded-card"
+            style={delay(260)}
           />
         )}
 
@@ -108,7 +122,7 @@ function CaseStudyPage({ project }) {
           <Block title={caseStudy.features}>
             <ul className="max-w-[72ch] space-y-5">
               {project.features.map((feature) => (
-                <li key={feature} className="flex gap-4 text-lg">
+                <li key={feature} ref={reveal} className="reveal flex gap-4 text-lg">
                   <LuPlus className="mt-[0.25em] size-[1.1em] shrink-0 text-accent" aria-hidden="true" />
                   {feature}
                 </li>
@@ -122,7 +136,13 @@ function CaseStudyPage({ project }) {
               style={{ "--steps": architecture.steps.length }}
             >
               {architecture.steps.map((step, i) => (
-                <li key={step.title} className="relative">
+                // Side by side on wide screens, where the steps come in one after another.
+                <li
+                  key={step.title}
+                  ref={reveal}
+                  className="reveal relative lg:[--reveal-delay:calc(var(--i)*110ms)]"
+                  style={{ "--i": i }}
+                >
                   <div className="rounded-2xl bg-raised p-5 lg:h-full lg:p-6">
                     <p className="display text-d4 text-muted tabular-nums" aria-hidden="true">
                       {String(i + 1).padStart(2, "0")}
@@ -142,13 +162,22 @@ function CaseStudyPage({ project }) {
                 </li>
               ))}
             </ol>
-            {architecture.note && <p className="mt-6 text-muted">{architecture.note}</p>}
+            {architecture.note && (
+              <p ref={reveal} className="reveal mt-6 text-muted">
+                {architecture.note}
+              </p>
+            )}
           </Block>
 
           <Block title={caseStudy.decisions}>
             <dl className="grid gap-x-12 gap-y-10 sm:grid-cols-2">
-              {project.decisions.map((decision) => (
-                <div key={decision.title} className="border-t border-line pt-6">
+              {project.decisions.map((decision, i) => (
+                <div
+                  key={decision.title}
+                  ref={reveal}
+                  className="reveal border-t border-line pt-6 sm:[--reveal-delay:calc(var(--i)*110ms)]"
+                  style={{ "--i": i % 2 }}
+                >
                   <dt className="display text-d4">{decision.title}</dt>
                   <dd className="mt-3 max-w-[48ch] text-muted">{decision.detail}</dd>
                 </div>
@@ -171,10 +200,12 @@ function CaseStudyPage({ project }) {
 
           {images.length > 1 && (
             <Block title={caseStudy.screenshots} wide>
-              <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+              {/* Two to a row at most: these are pictures of dense screens, and smaller than this they stop being readable. */}
+              <ul className="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:gap-x-10 lg:gap-y-16">
                 {images.slice(1).map((image, i) => (
-                  <li key={image.src}>
-                    <ScreenshotButton image={image} onOpen={() => setOpenImage(i + 1)} className="rounded-2xl" />
+                  // The second picture of a row comes in just after the first.
+                  <li key={image.src} className={i % 2 ? "sm:[--reveal-delay:120ms]" : undefined}>
+                    <Screenshot image={image} onOpen={() => setOpenImage(i + 1)} frameClassName="rounded-2xl" />
                   </li>
                 ))}
               </ul>
@@ -182,7 +213,11 @@ function CaseStudyPage({ project }) {
           )}
         </div>
 
-        <nav aria-label={projects.heading} className="flex flex-wrap items-center justify-between gap-6 py-14 lg:py-20">
+        <nav
+          ref={reveal}
+          aria-label={projects.heading}
+          className="reveal flex flex-wrap items-center justify-between gap-6 py-14 lg:py-20"
+        >
           <BackLink />
           <Link to={`/projects/${next.slug}`} className="group text-right">
             <span className="block text-small text-muted">{labels.nextProject}</span>
@@ -201,28 +236,37 @@ function CaseStudyPage({ project }) {
   );
 }
 
-// A screenshot that opens in the full-screen viewer.
-function ScreenshotButton({ image, eager = false, onOpen, className }) {
+// A screenshot that opens in the full-screen viewer, with its title and description underneath when it has them.
+function Screenshot({ image, eager = false, onOpen, className, frameClassName, style }) {
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className={cx(
-        "block w-full cursor-zoom-in overflow-hidden border border-line transition-colors duration-200 hover:border-accent",
-        className,
+    <figure ref={reveal} className={cx("reveal", className)} style={style}>
+      <button
+        type="button"
+        onClick={onOpen}
+        className={cx(
+          "block w-full cursor-zoom-in overflow-hidden border border-line transition-colors duration-200 hover:border-accent",
+          frameClassName,
+        )}
+      >
+        <span className="sr-only">{caseStudy.openImage}: </span>
+        <img
+          src={image.src}
+          width={image.width}
+          height={image.height}
+          alt={image.alt}
+          loading={eager ? "eager" : "lazy"}
+          decoding="async"
+          data-reveal-zoom
+          className="h-auto w-full"
+        />
+      </button>
+      {(image.title || image.caption) && (
+        <figcaption className="mt-4 max-w-[62ch]">
+          {image.title && <span className="block text-lg leading-snug font-semibold">{image.title}</span>}
+          {image.caption && <span className="mt-1.5 block text-small leading-normal text-muted">{image.caption}</span>}
+        </figcaption>
       )}
-    >
-      <span className="sr-only">{caseStudy.openImage}: </span>
-      <img
-        src={image.src}
-        width={image.width}
-        height={image.height}
-        alt={image.alt}
-        loading={eager ? "eager" : "lazy"}
-        decoding="async"
-        className="h-auto w-full"
-      />
-    </button>
+    </figure>
   );
 }
 
@@ -239,7 +283,8 @@ function BackLink() {
 }
 
 // A titled band of the case study. By default the title sits beside the content on wide screens;
-// `wide` stacks them so the content can use the full width.
+// `wide` stacks them so the content can use the full width. The content of a normal band comes in
+// as one piece; a wide band's items each come in on their own.
 function Block({ title, wide = false, children }) {
   return (
     <section
@@ -248,8 +293,14 @@ function Block({ title, wide = false, children }) {
         wide ? "lg:gap-y-9" : "lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)]",
       )}
     >
-      <h2 className="display text-d3">{title}</h2>
-      <div>{children}</div>
+      <RiseWords text={title} className="display text-d3" />
+      {wide ? (
+        <div>{children}</div>
+      ) : (
+        <div ref={reveal} className="reveal" style={delay(120)}>
+          {children}
+        </div>
+      )}
     </section>
   );
 }

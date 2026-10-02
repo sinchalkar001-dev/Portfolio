@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { startReveals } from "./reveal";
 
 const IntroContext = createContext(true);
 
@@ -39,6 +40,11 @@ export function IntroProvider({ children }) {
     );
     return () => timers.forEach(clearTimeout);
   }, []);
+
+  // Blocks that are on screen as the page opens come in with the page, not unseen behind the curtain.
+  useEffect(() => {
+    if (done) startReveals();
+  }, [done]);
 
   return <IntroContext.Provider value={done}>{children}</IntroContext.Provider>;
 }
