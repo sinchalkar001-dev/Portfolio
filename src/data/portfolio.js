@@ -88,9 +88,9 @@ export const hero = {
   },
   cta: { label: "View projects", section: "projects" },
   stats: [
-    { value: 83, suffix: "%", label: "faster dashboard queries after indexing" },
+    { value: 57, suffix: "%", label: "faster dashboard query with compound indexes" },
     { value: 1000, suffix: "+", label: "parallel booking requests, zero double-bookings" },
-    { value: 200, suffix: "", label: "concurrent users at 180 ms p95, zero failed requests" },
+    { value: 200, suffix: "", label: "concurrent users in load tests, zero failed requests" },
   ],
   photo: {
     // A transparent cutout, in two widths. The master PNG sits beside them as /sinchal-cutout.png.
@@ -416,9 +416,9 @@ export const projects = {
       title: "Skill Sphere",
       tagline: "Skill-based recruitment portal",
       tags: ["MERN", "MongoDB indexing", "Load testing"],
-      result: "180 ms p95 at 200 concurrent users, zero failed requests",
+      result: "Zero failed requests at 200 concurrent users, p95 under 180 ms in 5 of 6 runs",
       summary:
-        "A recruitment portal with role-based access for recruiters and candidates. Compound indexes on skill tags and application status made its dashboard queries 83% faster.",
+        "A recruitment portal with role-based access for recruiters and candidates. Compound indexes on skill tags and application status cut its dashboard query 57%, from 28 ms to 12 ms.",
       links: {
         github: "https://github.com/sinchalkar001-dev/Skill-Sphere-Online-Skill-Based-Recruitment-Portal",
       },
@@ -427,13 +427,13 @@ export const projects = {
         type: "query",
         title: "Dashboard query time",
         unit: "ms",
-        before: { label: "Without compound indexes", value: 820 },
-        after: { label: "With compound indexes", value: 140 },
-        note: "83% faster once compound indexes are added.",
+        before: { label: "Without compound indexes", value: 28 },
+        after: { label: "With compound indexes", value: 12 },
+        note: "57% faster. With the compound indexes the counts are answered from the index alone, so the documents read drop from 5,262 to 0. The method and every run are written up in the repository.",
       },
       overview: "Skill Sphere is a skill-based recruitment portal with role-based access for recruiters and candidates.",
       built:
-        "React dashboards over an Express REST API, backed by 6 MongoDB collections that support 500+ applications per posting. I load-tested the API at 200 concurrent users: 180 ms p95 latency with zero failed requests.",
+        "React dashboards over an Express REST API, backed by 6 MongoDB collections that support 500+ applications per posting. I load-tested the API at 200 concurrent users: zero failed requests, with p95 latency under 180 ms in 5 of 6 runs.",
       features: [
         "6 MongoDB collections supporting 500+ applications per posting, with compound indexes on skill tags and application status",
         "Stateless JWT auth with bcrypt hashing and role-based access for recruiters and candidates",
@@ -451,7 +451,7 @@ export const projects = {
         {
           title: "Indexes built for the dashboard's queries",
           detail:
-            "Compound indexes on skill tags and application status took dashboard query time from 820 ms to 140 ms, 83% faster.",
+            "Compound indexes on skill tags and application status cut the dashboard query 57%, from 28 ms to 12 ms. The counts are answered from the index alone, so the documents read fell from 5,262 to 0.",
         },
         {
           title: "Stateless authentication",
@@ -459,7 +459,8 @@ export const projects = {
         },
         {
           title: "Emails that retry",
-          detail: "Status-change emails go out with retry-on-failure delivery.",
+          detail:
+            "Status-change emails go out with retry-on-failure delivery: each one is queued first, sent in the background, and tried again after a longer wait each time a send fails.",
         },
       ],
       stack: ["React", "Node.js", "Express", "MongoDB", "JWT", "Nodemailer"],
@@ -472,6 +473,13 @@ export const projects = {
           "Skill Sphere's post-a-job form: requirements and responsibilities above an assessment rubric with four criteria, each with a maximum score and a weight",
           "Posting a job with its rubric",
           "A recruiter lists the role's tech stack, requirements and responsibilities, then sets the rubric every applicant will be scored on: each criterion with a maximum score and a weight.",
+        ),
+        shot(
+          "skill-sphere",
+          "13-edit-job",
+          "Skill Sphere's Edit job page: the posting form filled in with a senior full-stack developer role's title, description, job type and location",
+          "Editing a posting",
+          "A posting can be changed after it goes live, in the same form, filled in with what was saved. Only the recruiter who owns the posting can edit it.",
         ),
         shot(
           "skill-sphere",
@@ -504,16 +512,16 @@ export const projects = {
         shot(
           "skill-sphere",
           "02-hiring-dashboard",
-          "Skill Sphere's hiring dashboard in dark mode: counts of open roles and applicants, the recruiter's job postings, quick actions and recent activity",
+          "Skill Sphere's hiring dashboard in dark mode: counts of open roles and applicants, the recruiter's job postings, and the pipeline counted by stage",
           "Hiring dashboard",
-          "A recruiter's open roles, postings and applicants at a glance, with each posting's applicant count and controls to review, pause, edit or delete it. Shown in dark mode.",
+          "A recruiter's open roles, postings and applicants at a glance. The Pipeline panel counts every application by stage: that is the dashboard query the compound indexes answer from the index alone, without reading a single document. Shown in dark mode.",
         ),
         shot(
           "skill-sphere",
           "03-applicants",
-          "Skill Sphere applicant review: each candidate's skills and cover letter, with assess, accept and reject actions",
+          "Skill Sphere applicant review: stage filters with a count on each, a sort menu, and each candidate's skills and cover letter with assess, accept and reject actions",
           "Reviewing applicants",
-          "Everyone who applied for a role, filtered by stage, each with their skills, experience and cover letter. From here a recruiter starts a review, shortlists, scores, accepts or rejects.",
+          "Everyone who applied for a role, with a count on every stage filter, sorted by date or by score and loaded a page at a time. From here a recruiter starts a review, shortlists, scores, accepts or rejects.",
         ),
         shot(
           "skill-sphere",
@@ -527,7 +535,7 @@ export const projects = {
           "11-notifications",
           "The notifications menu open on a candidate's dashboard in Skill Sphere: Assessment Complete with an 83% score, and Application Shortlisted",
           "Live notifications",
-          "Being shortlisted, scored or moved to another stage reaches the candidate at once over Socket.IO, under the bell in the header, and by email as well.",
+          "Being shortlisted, scored or moved to another stage reaches the candidate at once over Socket.IO, under the bell in the header, and by email, which is retried if a send fails.",
         ),
         shot(
           "skill-sphere",
