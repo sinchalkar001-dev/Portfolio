@@ -234,6 +234,22 @@ const syncspaceCover = shot(
   "Two people draw and type in the same room at the same time. Each sees the other's cursor, edits merge through Yjs CRDTs instead of overwriting each other, and a run's output is shown to everyone.",
 );
 
+const skillSphereCover = shot(
+  "skill-sphere",
+  "01-landing",
+  "Skill Sphere home page in dark mode: Hire for skills you can see, beside a candidate's rubric score",
+  "Hire for skills you can see",
+  "The landing page, in dark mode. Candidates apply with the projects they have built, recruiters score every application against the same rubric, and both sides can see where an application stands.",
+);
+
+const eMedicoCover = shot(
+  "e-medico",
+  "01-home",
+  "E-Medico home page: Find a doctor, book a visit, beside a list of eight departments",
+  "Find a doctor, book a visit",
+  "Patients start from the list of departments, or search for a doctor by name or specialty.",
+);
+
 export const projects = {
   heading: "Selected work",
   intro: "Four projects, each with a measured result.",
@@ -406,11 +422,7 @@ export const projects = {
       links: {
         github: "https://github.com/sinchalkar001-dev/Skill-Sphere-Online-Skill-Based-Recruitment-Portal",
       },
-      cover: shot(
-        "skill-sphere",
-        "01-landing",
-        "Skill Sphere home page in dark mode: Hire for skills you can see, beside a candidate's rubric score",
-      ),
+      cover: skillSphereCover,
       proof: {
         type: "query",
         title: "Dashboard query time",
@@ -451,24 +463,86 @@ export const projects = {
         },
       ],
       stack: ["React", "Node.js", "Express", "MongoDB", "JWT", "Nodemailer"],
+      // In the order a hire happens: the job is written, found and applied to, then reviewed, scored and reported back.
       screenshots: [
+        skillSphereCover,
         shot(
           "skill-sphere",
-          "01-landing",
-          "Skill Sphere home page in dark mode: Hire for skills you can see, beside a candidate's rubric score",
+          "06-post-job",
+          "Skill Sphere's post-a-job form: requirements and responsibilities above an assessment rubric with four criteria, each with a maximum score and a weight",
+          "Posting a job with its rubric",
+          "A recruiter lists the role's tech stack, requirements and responsibilities, then sets the rubric every applicant will be scored on: each criterion with a maximum score and a weight.",
+        ),
+        shot(
+          "skill-sphere",
+          "04-jobs",
+          "Skill Sphere job board with search and filters for job type, experience and work style",
+          "Job board",
+          "Candidates search by title, skill or keyword and narrow the list by job type, experience and work style. Each card shows the pay, the tech stack, how many have applied, and whether the role is scored by rubric.",
+        ),
+        shot(
+          "skill-sphere",
+          "07-job-detail",
+          "A Skill Sphere job posting for a backend engineer: about the role, tech stack and requirements, with the salary, an Apply now button and details about the company",
+          "A job posting",
+          "The full posting: the role, its tech stack and requirements, the salary and the date applications close, and a note that applicants are scored by rubric.",
+        ),
+        shot(
+          "skill-sphere",
+          "08-profile",
+          "A candidate's profile in Skill Sphere: a short bio, skills, portfolio links and two projects with their tech stacks and links",
+          "Candidate profile",
+          "A candidate's skills, portfolio links and projects. Each project lists its tech stack and links to the live demo and the code, so the work itself is one click away.",
+        ),
+        shot(
+          "skill-sphere",
+          "05-application",
+          "A candidate's application in Skill Sphere at the shortlisted stage of a five-stage tracker, with the cover letter, an attached project and the job's details",
+          "Application tracker",
+          "Each application moves through five stages, from applied to a decision. The candidate sees which stage it has reached, next to their cover letter, the projects they attached and the role's details.",
         ),
         shot(
           "skill-sphere",
           "02-hiring-dashboard",
-          "Skill Sphere hiring dashboard for a recruiter: open roles, applicants and job postings",
+          "Skill Sphere's hiring dashboard in dark mode: counts of open roles and applicants, the recruiter's job postings, quick actions and recent activity",
+          "Hiring dashboard",
+          "A recruiter's open roles, postings and applicants at a glance, with each posting's applicant count and controls to review, pause, edit or delete it. Shown in dark mode.",
         ),
         shot(
           "skill-sphere",
           "03-applicants",
           "Skill Sphere applicant review: each candidate's skills and cover letter, with assess, accept and reject actions",
+          "Reviewing applicants",
+          "Everyone who applied for a role, filtered by stage, each with their skills, experience and cover letter. From here a recruiter starts a review, shortlists, scores, accepts or rejects.",
         ),
-        shot("skill-sphere", "04-jobs", "Skill Sphere job board with search and filters for job type, experience and work style"),
-        shot("skill-sphere", "05-application", "A candidate's application in Skill Sphere, with a five-stage progress tracker"),
+        shot(
+          "skill-sphere",
+          "09-assess",
+          "Skill Sphere's assessment dialog: four rubric criteria scored out of ten with sliders, each with a feedback note, and a box for overall feedback",
+          "Scoring against the rubric",
+          "The recruiter scores each criterion of the role's rubric, adds a note where it helps, and writes a summary for the candidate. The overall score takes each criterion's weight into account.",
+        ),
+        shot(
+          "skill-sphere",
+          "11-notifications",
+          "The notifications menu open on a candidate's dashboard in Skill Sphere: Assessment Complete with an 83% score, and Application Shortlisted",
+          "Live notifications",
+          "Being shortlisted, scored or moved to another stage reaches the candidate at once over Socket.IO, under the bell in the header, and by email as well.",
+        ),
+        shot(
+          "skill-sphere",
+          "10-scored",
+          "A candidate's view of their assessment in Skill Sphere: 83% overall, four criteria with scores and notes, the recruiter's summary, and the tracker at the assessed stage",
+          "What the candidate sees",
+          "Once scored, the candidate sees the overall score, every criterion with the recruiter's note, and the summary, and the tracker moves on to Assessed.",
+        ),
+        shot(
+          "skill-sphere",
+          "12-candidate-dashboard",
+          "Skill Sphere's candidate dashboard: application counts by stage, a recent application with its 83% score, quick actions and recent activity",
+          "Candidate dashboard",
+          "A candidate's applications counted by stage, the latest ones with their score, shortcuts to the job board and their profile, and recent activity.",
+        ),
       ],
     },
     {
@@ -482,7 +556,7 @@ export const projects = {
       links: {
         github: "https://github.com/sinchalkar001-dev/Doctor-Appointment-System",
       },
-      cover: shot("e-medico", "01-home", "E-Medico home page: Find a doctor, book a visit, beside a list of eight departments"),
+      cover: eMedicoCover,
       proof: {
         type: "race",
         title: "One slot, a thousand requests",
@@ -527,24 +601,85 @@ export const projects = {
         },
       ],
       stack: ["React", "Node.js", "Express", "MongoDB", "JWT"],
+      // Patients first, then the doctor's side, then the clinic's administrators.
       screenshots: [
-        shot("e-medico", "01-home", "E-Medico home page: Find a doctor, book a visit, beside a list of eight departments"),
-        shot(
-          "e-medico",
-          "03-booking",
-          "E-Medico booking panel: pick a doctor, a date and an open time, with taken times crossed out",
-        ),
+        eMedicoCover,
         shot(
           "e-medico",
           "02-doctors",
           "E-Medico doctor directory with each doctor's department, experience and consultation fee",
+          "Doctor directory",
+          "Every doctor with their department, years of experience and consultation fee. The list can be searched, filtered by department and sorted by name, fee or experience, and each card books straight from here.",
         ),
-        shot("e-medico", "04-appointments", "A patient's appointments in E-Medico, with the next visit and its status"),
-        shot("e-medico", "05-doctor-schedule", "A doctor's schedule in E-Medico, with a request waiting to be confirmed"),
+        shot(
+          "e-medico",
+          "03-booking",
+          "E-Medico booking panel: pick a doctor, a date and an open time, with taken times crossed out",
+          "Booking a visit",
+          "Pick a doctor, a day and an open time. Days off and fully booked days can't be picked, taken times are crossed out, and the doctor confirms each request. If two patients go for the same time at once, only one booking gets through.",
+        ),
+        shot(
+          "e-medico",
+          "04-appointments",
+          "A patient's appointments in E-Medico, with the next visit and its status",
+          "My appointments",
+          "A patient's next visit and all their appointments, upcoming, past and cancelled, each with its status and the reason given. When the doctor confirms or cancels, the change shows up at once, without a refresh.",
+        ),
+        shot(
+          "e-medico",
+          "07-reschedule",
+          "E-Medico's reschedule panel: a new day and an open time picked for an appointment with Dr. Sarah Johnson",
+          "Rescheduling",
+          "Moving an appointment works like booking one: the patient picks another day and time with the same doctor, from the times that doctor is actually free.",
+        ),
+        shot(
+          "e-medico",
+          "08-doctors-note",
+          "A patient's past appointments in E-Medico: a completed check-up with the doctor's note about blood work and cholesterol",
+          "The doctor's note",
+          "After a visit the doctor marks it completed and can leave a note, which the patient reads under their past appointments.",
+        ),
+        shot(
+          "e-medico",
+          "05-doctor-schedule",
+          "A doctor's schedule in E-Medico, with a request waiting to be confirmed",
+          "Doctor's schedule",
+          "Each doctor signs in to their own schedule: today's visits, then requests, upcoming, past and cancelled appointments. Requests are confirmed or declined from here.",
+        ),
+        shot(
+          "e-medico",
+          "09-working-hours",
+          "E-Medico's working-hours panel: Monday to Friday, 9:00 to 17:00 with a break from 13:00 to 14:00 and 30-minute appointments, making 14 a day",
+          "Working hours",
+          "A doctor sets their working days, hours, a daily break and how long an appointment lasts, and sees how many appointments a day that makes. Patients can only book inside these hours; existing appointments are kept.",
+        ),
         shot(
           "e-medico",
           "06-admin",
           "E-Medico admin overview: key numbers, appointments by status and requests awaiting confirmation",
+          "Admin overview",
+          "The clinic at a glance: doctors, registered users and appointments, a breakdown by status, and the requests still waiting, each of which can be confirmed from here.",
+        ),
+        shot(
+          "e-medico",
+          "10-admin-appointments",
+          "E-Medico's admin appointments table: patients, doctors, dates and statuses, with confirm and cancel buttons on pending requests",
+          "Every appointment",
+          "Admins see every appointment in the clinic, filtered by status, with the patient's reason, and can confirm or cancel the ones still open.",
+        ),
+        shot(
+          "e-medico",
+          "11-admin-doctors",
+          "E-Medico's admin doctors table: department, working hours, sign-in, experience and fee for each doctor, with edit and remove buttons and an Add doctor button",
+          "Managing doctors",
+          "The directory as admins run it: each doctor's department, working hours, sign-in for the doctor portal, experience and fee, with add, edit and remove.",
+        ),
+        shot(
+          "e-medico",
+          "12-admin-users",
+          "E-Medico's admin users list: doctors and patients with their role and the date they joined, and a search box",
+          "Registered users",
+          "Everyone with an account, their role and when they joined, searchable by name or email.",
         ),
       ],
     },
