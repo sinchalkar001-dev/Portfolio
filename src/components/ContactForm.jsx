@@ -4,9 +4,10 @@ import { contact, site } from "../data/portfolio";
 import { cx } from "../lib/hooks";
 import { Button } from "./ui";
 
-const { form, emailjs: emailjsConfig } = contact;
+const { form, formsubmit } = contact;
 const FIELDS = ["name", "email", "message"];
 const EMPTY = { name: "", email: "", message: "" };
+const SEND_TIMEOUT_MS = 15000;
 
 function validate(values) {
   const errors = {};
@@ -16,13 +17,43 @@ function validate(values) {
   return errors;
 }
 
-// Name, email and message, sent through EmailJS.
+// Sends one message through FormSubmit, which emails it on to `formsubmit.to`.
+// Resolves once FormSubmit says it has been accepted; rejects on anything else, including a form that is
+// still waiting for its first activation and a request that takes too long.
+async function deliver({ name, email, message }) {
+  const timeout = new AbortController();
+  const timer = setTimeout(() => timeout.abort(), SEND_TIMEOUT_MS);
+  try {
+    const response = await fetch(`https://formsubmit.co/ajax/${formsubmit.to}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({
+        name,
+        email,
+        message,
+        _subject: `${form.subject} ${name}`,
+        _replyto: email,
+        _template: "table",
+        _captcha: "false",
+      }),
+      signal: timeout.signal,
+    });
+    const result = await response.json().catch(() => ({}));
+    // FormSubmit answers `success` as the string "true" or "false".
+    if (!response.ok || String(result.success) !== "true") throw new Error(result.message || `HTTP ${response.status}`);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Name, email and message, delivered by FormSubmit.
 // Each field is checked when you leave it and again as you fix it; the result of sending is always spelled out.
 export default function ContactForm() {
   const [values, setValues] = useState(EMPTY);
   const [touched, setTouched] = useState({});
   const [status, setStatus] = useState("idle"); // idle | sending | sent | failed | handed-off
   const refs = { name: useRef(null), email: useRef(null), message: useRef(null) };
+  const trapRef = useRef(null); // a field people never see; only form-filling bots fill it in
 
   const errors = validate(values);
   const shown = (field) => (touched[field] ? errors[field] : undefined);
@@ -50,10 +81,17 @@ export default function ContactForm() {
     const name = values.name.trim();
     const email = values.email.trim();
     const message = values.message.trim();
-    const { serviceId, templateId, publicKey } = emailjsConfig;
 
-    // Until EmailJS is set up in portfolio.js, hand the message to the visitor's own email app.
-    if (!serviceId || !templateId || !publicKey) {
+    // A bot filled in the hidden field: thank it and send nothing.
+    if (trapRef.current?.value) {
+      setValues(EMPTY);
+      setTouched({});
+      setStatus("sent");
+      return;
+    }
+
+    // With no address to deliver to, hand the message to the visitor's own email app instead.
+    if (!formsubmit?.to) {
       const subject = encodeURIComponent(`${form.subject} ${name}`);
       const body = encodeURIComponent(`${message}\n\n${name}\n${email}`);
       window.location.href = `mailto:${site.email}?subject=${subject}&body=${body}`;
@@ -63,13 +101,7 @@ export default function ContactForm() {
 
     setStatus("sending");
     try {
-      const { default: emailjs } = await import("@emailjs/browser");
-      await emailjs.send(
-        serviceId,
-        templateId,
-        { name, email, message, from_name: name, reply_to: email },
-        { publicKey },
-      );
+      await deliver({ name, email, message });
       setValues(EMPTY);
       setTouched({});
       setStatus("sent");
@@ -97,6 +129,15 @@ export default function ContactForm() {
 
   return (
     <form noValidate onSubmit={onSubmit} className="space-y-6">
+      <input
+        ref={trapRef}
+        type="text"
+        name="_honey"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="hidden"
+      />
       <div>
         <label htmlFor="contact-name" className="font-semibold">
           {form.name}

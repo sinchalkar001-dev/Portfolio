@@ -640,13 +640,14 @@ export const contact = {
     viaEmailApp: "Your email app should open with the message filled in. If it doesn't, write to",
     subject: "Portfolio message from",
   },
-  // From emailjs.com: Email Services, Email Templates and Account > Public Key.
-  // The template can use {{name}}, {{email}} and {{message}}.
-  // While any of the three is empty, the form opens the visitor's email app instead.
-  emailjs: {
-    serviceId: "",
-    templateId: "",
-    publicKey: "",
+  // The form sends through FormSubmit (formsubmit.co), which emails every message to `to`.
+  // Nothing is delivered until the address is activated: FormSubmit emails it an "Activate Form" link
+  // the first time the form is used, and that link has to be clicked once.
+  // After activating, FormSubmit also offers a random string that can stand in for the address here,
+  // so the address is not readable in the page's code. Leave `to` empty and the form opens the
+  // visitor's email app instead.
+  formsubmit: {
+    to: site.email,
   },
 };
 
