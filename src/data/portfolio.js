@@ -212,6 +212,8 @@ export const techStack = {
 //   cover        Picture on the home-page card. Leave it out and the card shows the live `proof` instead.
 //   screenshots  Gallery on the case-study page. Leave the list empty and the gallery is hidden.
 //   proof        The animated evidence for the result. Shown on the case-study page.
+//                type "query" (one bar shrinking from `before` to `after`), "bars" (each bar filling
+//                to its value; a value with a decimal keeps one decimal place) or "race".
 //   links        Any link left out hides its button.
 //   alt      what the picture shows, for people who cannot see it
 //   title    optional heading shown under the picture
@@ -248,6 +250,14 @@ const eMedicoCover = shot(
   "E-Medico home page: Find a doctor, book a visit, beside a list of eight departments",
   "Find a doctor, book a visit",
   "Patients start from the list of departments, or search for a doctor by name or specialty.",
+);
+
+const creditRiskCover = shot(
+  "credit-risk",
+  "01-home",
+  "Credit Risk & Fraud Detection home page in its dark theme: Catch the application that doesn't add up, beside a credit card and a statement with one row stamped Flagged",
+  "Catch the application that doesn't add up",
+  "The home page, in the dark theme. Twenty details about a credit application go in; a gradient boosting model trained on 1,000 labelled applications gives it a risk score and flags the ones that look bad.",
 );
 
 export const projects = {
@@ -694,56 +704,158 @@ export const projects = {
     {
       slug: "credit-risk",
       title: "Credit Risk & Fraud Detection",
-      tagline: "Machine-learning classification API",
+      tagline: "Credit-risk scoring web app and REST API",
       tags: ["Python", "Machine learning", "Flask", "Docker"],
-      result: "91% test accuracy against a 70% majority-class baseline",
+      result: "0.815 ROC AUC on held-out applications, with 71.7% of the bad ones caught",
       summary:
-        "A Flask REST API that classifies credit risk for single records or batch CSV uploads, built on a Gradient Boosting model trained on a 1,000-record credit dataset.",
-      links: {},
+        "A Flask web app and REST API that scores credit applications for risk, one at a time or as a CSV file, with a Gradient Boosting model trained on a 1,000-record credit dataset and tested on applications it has never seen.",
+      links: {
+        github: "https://github.com/sinchalkar001-dev/Credit-Card-Fraud-Detection",
+      },
+      cover: creditRiskCover,
       proof: {
-        type: "accuracy",
-        title: "Test accuracy",
+        type: "bars",
+        title: "Bad applications caught",
         unit: "%",
         bars: [
-          { label: "Majority-class baseline", value: 70 },
-          { label: "Gradient Boosting model", value: 91, highlight: true },
+          { label: "Without class weighting", value: 56.7 },
+          { label: "With class weighting, as served", value: 71.7, highlight: true },
         ],
-        note: "Always predicting the majority class scores 70%, so that is the number the model has to beat.",
+        note: "Measured on 200 applications held out before training. Weighting each bad application to count as much as 2.33 good ones catches more of them, and costs accuracy (80.0% down to 72.5%) and more false alarms.",
       },
-      overview: "A machine-learning API that classifies credit risk, with an analytics dashboard on top.",
+      overview:
+        "A Flask web app and REST API that scores credit applications for risk. A Gradient Boosting classifier gives every application a risk score from 0 to 100 and flags it when the score is over 50.",
       built:
-        "A Flask REST API with single-record and batch CSV inference, session auth and an analytics dashboard, around a Gradient Boosting classifier trained on a 1,000-record, 20-attribute credit dataset.",
+        "A Flask REST API and web interface with single-record and batch CSV inference, session-based auth and an analytics dashboard, around a Gradient Boosting classifier trained on a 1,000-record, 20-attribute credit dataset. The model is tested on 200 applications held out before training, and a Performance page shows every score, including where it goes wrong.",
       features: [
-        "Flask REST API for credit-risk classification with single-record and batch CSV inference, session auth and an analytics dashboard",
-        "Gradient Boosting classifier trained on a 1,000-record, 20-attribute credit dataset",
+        "Flask REST API for credit-risk classification with single-record and batch CSV inference, session-based auth and an analytics dashboard",
+        "Gradient Boosting classifier trained on a 1,000-record, 20-attribute credit dataset, with its settings chosen by 5-fold cross-validation",
+        "Leakage-free evaluation: 200 applications are held out before training and nothing is oversampled, so no test row is a copy of a training row",
+        "A Performance page with the held-out scores, the confusion matrix, cross-validation and each input's weight in the model",
+        "Tests for the schema, validation, CSV handling, the model, the training protocol, every page and every endpoint, run by GitHub Actions on each push together with a Docker build",
         "Containerised with Docker Compose, with a health-check endpoint",
       ],
       architecture: {
         steps: [
-          { title: "Input", detail: "A single record or a CSV upload" },
-          { title: "Flask REST API", detail: "Session auth" },
-          { title: "Gradient Boosting model" },
-          { title: "Risk label" },
-          { title: "Analytics dashboard" },
+          { title: "Input", detail: "A form, a CSV upload or a JSON request" },
+          { title: "Flask app and REST API", detail: "Session auth and validation of all 20 inputs" },
+          { title: "Gradient Boosting model", detail: "300 trees, bad applications weighted 2.33 to 1" },
+          { title: "Risk score", detail: "0 to 100, flagged when over 50" },
+          { title: "Analytics and performance", detail: "Bad rates in the data, scores on unseen applications" },
         ],
+        note: "Runs under Docker Compose, served by gunicorn, with a health-check endpoint.",
       },
       decisions: [
         {
-          title: "Measured against a baseline",
+          title: "Tested on applications it has never seen",
           detail:
-            "The model reaches 91% test accuracy. Always predicting the majority class would score 70%, so that is the number it has to beat.",
+            "200 of the 1,000 applications are set aside first, keeping the 70/30 mix. Tree depth, tree count and learning rate are chosen by 5-fold cross-validation on the other 800, and the finished model is scored once on the 200.",
         },
         {
-          title: "Single and batch inference in one API",
-          detail: "The same Flask REST API scores one record at a time or a whole CSV upload.",
+          title: "No leak between training and test",
+          detail:
+            "Nothing is oversampled, so a held-out application can never be a copy of a training one. The notebook this project started from oversampled the bad class before splitting, which put copies of training rows in its test set and inflated its accuracy to 91%. Measured without the leak, accuracy is 72.5% against a 70% majority-class baseline, and ROC AUC is 0.815.",
         },
         {
-          title: "Containerised, with a health check",
-          detail: "The service runs under Docker Compose and exposes a health-check endpoint.",
+          title: "Weighted towards catching bad applications",
+          detail:
+            "Each bad application counts as much as 2.33 good ones in training. Without that the model is right more often (80.0%) but catches only 56.7% of bad applications; with it, 71.7%. A missed bad application costs more than a false alarm, so the weighted model is the one served.",
+        },
+        {
+          title: "One schema for every input",
+          detail:
+            "The 20 inputs, with their labels, ranges and codes, are defined once and used by the form, the CSV reader, the JSON API and the training script, so they cannot drift apart.",
         },
       ],
-      stack: ["Python", "Flask", "scikit-learn", "Pandas", "Docker"],
-      screenshots: [],
+      stack: ["Python", "Flask", "scikit-learn", "Pandas", "Docker", "GitHub Actions"],
+      // In the order an analyst meets them: sign in, check one application, score a file, then the data and the model.
+      screenshots: [
+        creditRiskCover,
+        shot(
+          "credit-risk",
+          "02-sign-in",
+          "The sign-in page: username and password fields in front of engraved line-work, with a note giving the demo credentials",
+          "Sign-in",
+          "Session-based sign-in for the analyst, with CSRF protection and safe redirects. The demo credentials are shown only while they are still the defaults.",
+        ),
+        shot(
+          "credit-risk",
+          "03-check",
+          "The Check an application form filled with a high-risk example, and a verdict panel showing a risk score of 92.5 and a red Flagged stamp",
+          "Checking one application",
+          "The analyst fills in the 20 details, or loads a worked example, and gets a verdict: a risk score from 0 to 100 on a dial, flagged when it is over 50.",
+        ),
+        shot(
+          "credit-risk",
+          "04-validation",
+          "The same form with two mistakes: a summary reading Fix 2 fields to get a verdict, and messages under the balance and age fields",
+          "Mistakes named field by field",
+          "A missing or impossible value doesn't get a guess. The form lists what to fix, links to each field and says what is wrong: here an empty balance and an age outside 18 to 100. The API answers the same way, with a 400 that names each field.",
+        ),
+        shot(
+          "credit-risk",
+          "05-upload",
+          "The Score a CSV file page with sample_upload.csv chosen, beside the list of the 20 columns a file needs",
+          "Scoring a whole file",
+          "A CSV of up to 10,000 applications is read, scored and discarded; nothing is kept. Values can be written the way the dataset writes them or as the model's numeric codes, and the columns can come in any order.",
+        ),
+        shot(
+          "credit-risk",
+          "06-results",
+          "Results for sample_upload.csv: 6 rows flagged, 6 cleared, the model agreeing with 11 of the 12 labels, and a table of rows with the riskiest first",
+          "Batch results",
+          "Every row gets a verdict and a score, listed riskiest first and filterable by verdict. If the file has a class column, the page also shows how often the model agrees with it. A row that cannot be read is listed with the reason instead of stopping the file.",
+        ),
+        shot(
+          "credit-risk",
+          "07-analytics",
+          "Dataset analytics: 700 good and 300 bad applications, and the start of a chart of the bad rate by checking account",
+          "Dataset analytics",
+          "The 1,000 labelled applications the model learns from: 700 good and 300 bad. A model that always answered “good” would be right 70% of the time, so that is the number any accuracy has to beat.",
+        ),
+        shot(
+          "credit-risk",
+          "08-breakdown",
+          "Bad rate by credit history as a bar chart, from 63% for applicants with no credit taken or all paid back down to 17% for critical accounts, against a 30% overall line",
+          "Where risk concentrates",
+          "The bad rate can be broken down by any of the 20 inputs, as a chart or a table, against the overall 30%. Each bar says how many records it stands for, because small groups swing more.",
+        ),
+        shot(
+          "credit-risk",
+          "09-performance",
+          "Model performance on held-out applications: ROC AUC 0.815, recall 71.7%, precision 53.1%, F1 61.0% and accuracy 72.5%, under a note on how the scores were measured",
+          "Scores on applications it has never seen",
+          "200 of the 1,000 applications are set aside before training, keeping the same mix of good and bad, and scored once. On them the model reaches 0.815 ROC AUC and flags 71.7% of the bad applications; 53.1% of its flags are right.",
+        ),
+        shot(
+          "credit-risk",
+          "10-verdicts",
+          "A confusion matrix of the 200 held-out applications, 102 rightly cleared, 38 false alarms, 17 missed and 43 caught, beside a table comparing held-out scores with 5-fold cross-validation",
+          "Where the verdicts landed",
+          "Of the 200 held-out applications, 102 were rightly cleared and 43 bad ones caught, with 38 false alarms and 17 missed. One test of 200 rows can be lucky, so every score is measured again by 5-fold cross-validation on the training rows, and the two land close together.",
+        ),
+        shot(
+          "credit-risk",
+          "11-importance",
+          "A chart of each input's share of the model's decisions, led by checking account at 22%, current balance at 16.2% and credit usage at 11.9%, above the model's settings",
+          "What the model weighs most",
+          "Each input's share of the model's decisions: checking account 22%, current balance 16%, credit usage 12%. Below it are the settings chosen by cross-validation: 300 trees of depth 2 at a learning rate of 0.05.",
+        ),
+        shot(
+          "credit-risk",
+          "12-unweighted",
+          "The same Performance page switched to the unweighted model: ROC AUC 0.830, recall 56.7%, precision 70.8%, F1 63.0% and accuracy 80.0%",
+          "The trade-off, shown side by side",
+          "The page can switch to the same model fitted without class weights. It is right more often, 80.0% against 72.5%, but lets more bad applications through: it catches 56.7% of them instead of 71.7%. That is why the weighted model is the one in use.",
+        ),
+        shot(
+          "credit-risk",
+          "13-ci",
+          "A GitHub Actions run for the repository with both jobs passing: test, then docker",
+          "Continuous integration",
+          "On every push GitHub Actions trains the model and runs the test suite, then builds the Docker image, waits for its health check and scores the sample file through the API.",
+        ),
+      ],
     },
   ],
 };

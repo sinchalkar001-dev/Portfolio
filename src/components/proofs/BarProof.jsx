@@ -3,14 +3,18 @@ import { cx, usePrefersReducedMotion } from "../../lib/hooks";
 import { gsap, useGSAP } from "../../lib/motion";
 
 // Horizontal bars that animate once when they scroll into view. Used for two proofs:
-//   query     one bar starts at the "before" value and shrinks to the "after" value
-//   accuracy  each bar fills from zero to its value
+//   query  one bar starts at the "before" value and shrinks to the "after" value
+//   bars   each bar fills from zero to its value
 // Every bar's final state is what React renders, so reduced motion and no-script both show the result.
 export default function BarProof({ proof }) {
   const root = useRef(null);
   const reduced = usePrefersReducedMotion();
   const bars = toBars(proof);
   const max = Math.max(...bars.map((bar) => Math.max(bar.from, bar.to)), proof.unit === "%" ? 100 : 0);
+  // Whole numbers stay whole. If any value is given with a decimal, every bar keeps one decimal place,
+  // while it counts as well as when it stops.
+  const places = bars.some((bar) => !Number.isInteger(bar.to)) ? 1 : 0;
+  const format = (value) => value.toFixed(places);
 
   useGSAP(
     () => {
@@ -26,7 +30,7 @@ export default function BarProof({ proof }) {
         const state = { v: from };
         const render = () => {
           fill.style.width = `${(state.v / max) * 100}%`;
-          value.textContent = Math.round(state.v);
+          value.textContent = format(state.v);
         };
         render();
         timeline.to(state, { v: to, duration: 1.5, ease: "power3.inOut", onUpdate: render }, 0.25 + i * 0.2);
@@ -44,7 +48,7 @@ export default function BarProof({ proof }) {
             <div className="flex items-baseline justify-between gap-4">
               <span className={cx("text-small", bar.highlight ? "text-fg" : "text-muted")}>{bar.label}</span>
               <span className={cx("display text-d4 tabular-nums", bar.highlight ? "text-fg" : "text-muted")}>
-                <span data-bar-value>{bar.to}</span>
+                <span data-bar-value>{format(bar.to)}</span>
                 {proof.unit === "%" ? "%" : ` ${proof.unit}`}
               </span>
             </div>
